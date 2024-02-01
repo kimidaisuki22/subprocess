@@ -16,4 +16,5 @@ TEST(HelloTest, BasicAssertions) {
   EXPECT_EQ(proc->return_code(), 0);
 
   EXPECT_TRUE(std::filesystem::exists(test_file_name));
+  std::filesystem::remove(test_file_name);
 }
