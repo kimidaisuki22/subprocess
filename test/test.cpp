@@ -8,7 +8,7 @@ TEST(HelloTest, BasicAssertions) {
   // Expect equality.
   EXPECT_FALSE(std::filesystem::exists(test_file_name));
   subprocess::Create_info_simplest create_info{};
-  create_info.execute_name = "my_touch";
+  create_info.execute_name = "./my_touch";
   auto proc = subprocess::create(create_info);
   EXPECT_NE(proc, nullptr);
   proc->wait();
