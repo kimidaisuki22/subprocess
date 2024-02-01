@@ -77,7 +77,7 @@ public:
   uint64_t pid() const override { return processId; }
 };
 
-std::unique_ptr<Controller> create(const Create_info_simplest &info) {
+__declspec( dllexport ) std::unique_ptr<Controller> create(const Create_info_simplest &info) {
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
 
