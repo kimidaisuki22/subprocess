@@ -7,5 +7,5 @@ int main(int argc, char **argv) {
       std::string{argc > 1 ? std::string_view{argv[1]} : test_file_name};
   std::ofstream file{filename};
 
-  return file.is_open();
+  return file.is_open() ? 0 : 1;
 }
