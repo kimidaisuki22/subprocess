@@ -25,3 +25,19 @@ if(BUILD_TESTING)
   enable_testing()
   add_subdirectory(test)
 endif()
+
+# Copy cmake install from project cy.
+include(CPack)
+include(GNUInstallDirs)
+install(TARGETS subprocess
+    EXPORT subprocess
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION  ${CMAKE_INSTALL_BINDIR}
+)
+install(EXPORT subprocess
+    FILE subprocessConfig.cmake
+    NAMESPACE subprocess::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/subprocess
+)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
