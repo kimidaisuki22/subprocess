@@ -9,7 +9,19 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_library(subprocess)
 if(WIN32)
+
 target_sources(subprocess PRIVATE src/win32/subprocess.cpp)
+get_target_property(target_type subprocess TYPE)
+
+if (target_type STREQUAL "STATIC_LIBRARY")
+  target_compile_definitions(subprocess PUBLIC SUBPROCESS_STATIC)
+  message(STATUS "Static library" )
+else()
+  message(STATUS "Shared library" )
+endif()
+
+target_compile_definitions(subprocess PRIVATE SUBPROCESS_EXPORTS)
+
 elseif(UNIX)
 target_sources(subprocess PRIVATE src/unix/subprocess.cpp)
 else()
