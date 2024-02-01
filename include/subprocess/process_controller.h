@@ -11,7 +11,7 @@ public:
   virtual void stop() = 0;
   virtual void wait() = 0;
 
-  virtual int return_code() = 0;
-  virtual uint64_t pid() = 0;
+  virtual int return_code() const = 0;
+  virtual uint64_t pid() const = 0;
 };
 } // namespace subprocess
