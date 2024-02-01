@@ -2,7 +2,7 @@
 #include <cstdint>
 namespace subprocess {
 
-class controller {
+class Controller {
 public:
   virtual bool has_start() const = 0;
   virtual bool is_running() const = 0;

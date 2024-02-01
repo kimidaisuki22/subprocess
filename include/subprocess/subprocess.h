@@ -3,5 +3,5 @@
 #include <memory>
 #include <subprocess/create_info.h>
 namespace subprocess {
-std::unique_ptr<controller> create(const Create_info_simplest &info);
+std::unique_ptr<Controller> create(const Create_info_simplest &info);
 } // namespace subprocess
