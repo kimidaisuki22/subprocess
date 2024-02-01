@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 namespace subprocess {
 
 class controller {
@@ -11,5 +12,6 @@ public:
   virtual void wait() = 0;
 
   virtual int return_code() = 0;
+  virtual uint64_t pid() = 0;
 };
 } // namespace subprocess
