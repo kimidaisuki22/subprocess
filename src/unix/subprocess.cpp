@@ -3,6 +3,7 @@
 #include <subprocess/subprocess.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <signal.h>
 
 namespace subprocess {
 
