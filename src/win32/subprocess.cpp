@@ -2,6 +2,8 @@
 #include "subprocess/process_controller.h"
 #include <cstdint>
 #include <filesystem>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <subprocess/subprocess.h>
 
@@ -149,7 +151,9 @@ std::unique_ptr<Controller> create(const Create_info_extend &info) {
     if (!cmd.empty()) {
       cmd += " ";
     }
-    cmd += arg;
+    std::stringstream ss;
+    ss << std::quoted(arg);
+    cmd += ss.str();
   }
   // Create a subprocess.
   if (!CreateProcessA(const_cast<char *>(exe.c_str()), // module name

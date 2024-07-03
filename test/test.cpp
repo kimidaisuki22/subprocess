@@ -34,3 +34,19 @@ TEST(HelloTest, Extend_no_space_one_file) {
   EXPECT_TRUE(std::filesystem::exists(filename));
   std::filesystem::remove(filename);
 }
+
+TEST(HelloTest, Extend_space_one_file) {
+  std::string filename = "my file";
+  EXPECT_FALSE(std::filesystem::exists(filename));
+  subprocess::Create_info_extend create_info{};
+  create_info.execute_name = "./my_touch";
+  create_info.args = {filename};
+  auto proc = subprocess::create(create_info);
+  EXPECT_NE(proc, nullptr);
+  proc->wait();
+  EXPECT_TRUE(proc->has_stopped());
+  EXPECT_EQ(proc->return_code(), 0);
+
+  EXPECT_TRUE(std::filesystem::exists(filename));
+  std::filesystem::remove(filename);
+}
