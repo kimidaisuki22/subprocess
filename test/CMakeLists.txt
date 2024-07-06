@@ -15,3 +15,4 @@ target_link_libraries(
 add_test(test_A hello_test)
 
 add_executable(my_touch sample/touch_file.cpp)
+add_executable(args_to_files sample/args_to_files.cpp)
