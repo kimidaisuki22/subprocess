@@ -1,9 +1,10 @@
 #include "subprocess/process_controller.h"
 #include <cstdint>
+#include <signal.h>
 #include <subprocess/subprocess.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <signal.h>
+#include <vector>
 
 namespace subprocess {
 
@@ -93,10 +94,34 @@ std::unique_ptr<Controller> create(const Create_info_simplest &info) {
     exit(EXIT_FAILURE);
   } else if (pid < 0) {
     // Handle error in fork
+    return {};
   }
 
   // Parent process
   return std::make_unique<UnixController>(pid);
 }
+std::unique_ptr<Controller> create(const Create_info_extend &info) {
+  pid_t pid = fork();
+  if (pid == 0) {
+    std::vector<std::string> args_copy;
+    std::vector<char *> argv;
+    args_copy.push_back(info.execute_name);
+    for (auto &arg : info.args) {
+      args_copy.push_back(arg);
+    }
+    for (auto &arg : args_copy) {
+      argv.push_back(arg.data());
+    }
+    // Child process
+    execvp(info.execute_name.c_str(), argv.data());
+    // If execlp returns, it must have failed.
+    exit(EXIT_FAILURE);
+  } else if (pid < 0) {
+    // Handle error in fork
+    return {};
+  }
 
+  // Parent process
+  return std::make_unique<UnixController>(pid);
+}
 } // namespace subprocess
