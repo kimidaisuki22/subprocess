@@ -21,6 +21,22 @@ TEST(HelloTest, BasicAssertions) {
   EXPECT_TRUE(std::filesystem::exists(test_file_name));
   std::filesystem::remove(test_file_name);
 }
+TEST(HelloTest, absolute_path) {
+  // Expect equality.
+  EXPECT_FALSE(std::filesystem::exists(test_file_name));
+  subprocess::Create_info_simplest create_info{};
+  create_info.execute_name = (std::filesystem::current_path() / "my_touch")
+                                 .lexically_normal()
+                                 .string();
+  auto proc = subprocess::create(create_info);
+  EXPECT_NE(proc, nullptr);
+  proc->wait();
+  EXPECT_TRUE(proc->has_stopped());
+  EXPECT_EQ(proc->return_code(), 0);
+
+  EXPECT_TRUE(std::filesystem::exists(test_file_name));
+  std::filesystem::remove(test_file_name);
+}
 
 TEST(HelloTest, Extend_no_space_one_file) {
   std::string filename = "my_file";
@@ -55,7 +71,8 @@ TEST(HelloTest, Extend_space_one_file) {
 }
 
 TEST(HelloTest, Extend_space_three_args) {
-  std::vector<std::string> texts{"my file", "line_2", "Last'Time", "End; Quota\" "};
+  std::vector<std::string> texts{"my file", "line_2", "Last'Time",
+                                 "End; Quota\" "};
   EXPECT_FALSE(std::filesystem::exists(test_file_name));
   subprocess::Create_info_extend create_info{};
   create_info.execute_name = "./args_to_files";
