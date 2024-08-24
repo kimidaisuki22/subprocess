@@ -1,5 +1,9 @@
+#include "child_pipe.h"
 #include "subprocess/process_controller.h"
+#include "subprocess/process_controller_with_io.h"
 #include <cstdint>
+#include <cstdio>
+#include <iostream>
 #include <signal.h>
 #include <subprocess/subprocess.h>
 #include <sys/wait.h>
@@ -8,7 +12,7 @@
 
 namespace subprocess {
 
-class UnixController : public Controller {
+class UnixController : virtual public Controller {
 private:
   pid_t pid_;
   mutable int exitStatus; // mutable allows modification in a const method
@@ -84,6 +88,23 @@ public:
   }
   uint64_t pid() const override { return pid_; }
 };
+class UnixController_with_io : virtual public UnixController,
+                               virtual public Controller_with_IO {
+public:
+  UnixController_with_io(pid_t pid, Child_pipe &&pipe)
+      : UnixController(pid), pipe_(std::move(pipe)) {}
+  Length read(void *buffer, size_t read_size) override {
+    return ::read(pipe_.get_parent_read_fd(), buffer, read_size);
+  }
+  Length write(const void *buffer, size_t read_size) override {
+    return ::write(pipe_.get_parent_write_fd(), buffer, read_size);
+  }
+  bool close_read() override { return pipe_.close_parent_read() == 0; }
+  bool close_write() override { return pipe_.close_parent_write() == 0; }
+
+private:
+  Child_pipe pipe_{};
+};
 
 std::unique_ptr<Controller> create(const Create_info_simplest &info) {
   pid_t pid = fork();
@@ -123,5 +144,39 @@ std::unique_ptr<Controller> create(const Create_info_extend &info) {
 
   // Parent process
   return std::make_unique<UnixController>(pid);
+}
+std::unique_ptr<Controller_with_IO>
+create_with_io(const Create_info_extend &info) {
+  Child_pipe pipe;
+  if (!pipe.is_ok()) {
+    // failed to create pipe.
+    return nullptr;
+  }
+  pid_t pid = fork();
+  if (pid == 0) {
+    pipe.apply_redict_for_child();
+    pipe.close_all();
+    std::vector<std::string> args_copy;
+    std::vector<char *> argv;
+    args_copy.push_back(info.execute_name);
+    for (auto &arg : info.args) {
+      args_copy.push_back(arg);
+    }
+    for (auto &arg : args_copy) {
+      argv.push_back(arg.data());
+    }
+    // Child process
+    execvp(info.execute_name.c_str(), argv.data());
+    // If execlp returns, it must have failed.
+    exit(EXIT_FAILURE);
+  } else if (pid < 0) {
+    // Handle error in fork
+    return {};
+  }
+  // Parent process
+  pipe.close_child_read();
+  pipe.close_child_write();
+
+  return std::make_unique<UnixController_with_io>(pid, std::move(pipe));
 }
 } // namespace subprocess
